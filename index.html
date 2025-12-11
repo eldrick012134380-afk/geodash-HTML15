@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Geometry Dash Modern</title>
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #090909;
+    font-family: Arial, Helvetica;
+}
+
+/* ---------- MENU ---------- */
+#menu, #levelMenu, #characterMenu {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    color: white;
+    z-index: 5;
+}
+
+#logo {
+    font-size: 60px;
+    font-weight: bold;
+    background: linear-gradient(45deg,#00eaff,#ff0059);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(0,255,255,0.6),0 0 10px rgba(255,0,89,0.6);
+}
+
+button {
+    padding: 15px 35px;
+    font-size: 25px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #00eaff;
+    color: #000;
+    font-weight: bold;
+    transition: 0.2s;
+}
+button:hover {
+    transform: scale(1.1);
+    background: #00b8cc;
+}
+
+/* ---------- BACK BUTTON ---------- */
+#backBtn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 30px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: #00eaff;
+    color: #000;
+    display: none;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* ---------- GAME AREA ---------- */
+#game {
+    display: none;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(#111,#1a1a1a);
+    overflow: hidden;
+}
+
+/* ---------- PROGRESS BAR ---------- */
+#progressContainer {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 25px;
+    background: #222;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #fff;
+    font-size: 14px;
+}
+#progressBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,#00eaff,#00ffcc);
+    border-radius: 12px;
+    transition: width 0.2s;
+    z-index: -1;
+}
+
+/* ---------- FLOOR ---------- */
+#ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    background: #1a1a1a;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+}
+
+/* ---------- PLAYER ---------- */
+#player {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    bottom: 80px;
+    left: 80px;
+    background: linear-gradient(45deg,#00eaff,#00ffcc);
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00eaff;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.circle { border-radius: 50%; }
+.triangle {
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid #00eaff;
+    background: none !important;
+}
+
+/* ---------- OBSTACLE ---------- */
+.obstacle {
+    position: absolute;
+    width: 30px;
+    height: 50px;
+    bottom: 80px;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#ff0059,#ff80a0);
+    box-shadow: 0 0 5px #ff0059;
+}
+
+/* ---------- SCORE ---------- */
+#score {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 25px;
+    text-shadow: 0 0 5px #00eaff;
+    z-index: 11;
+}
+
+/* ---------- GAME OVER ---------- */
+#gameover {
+    position: absolute;
+    top: 35%;
+    width: 100%;
+    text-align: center;
+    font-size: 60px;
+    color: #ff0059;
+    text-shadow: 0 0 10px #ff0059;
+    display: none;
+}
+#gameover button {
+    margin-top: 20px;
+    margin-right: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+<div id="menu">
+    <div id="logo">GEOMETRY DASH</div>
+    <button onclick="openLevelMenu()">PLAY</button>
+    <button onclick="openCharacterMenu()">CHARACTER</button>
+</div>
+
+<!-- LEVEL SELECT -->
+<div id="levelMenu" style="display:none">
+    <h1>PILIH LEVEL</h1>
+    <button onclick="startGame('easy')">EASY</button>
+    <button onclick="startGame('medium')">MEDIUM</button>
+    <button onclick="startGame('hard')">HARD</button>
+</div>
+
+<!-- CHARACTER SELECT -->
+<div id="characterMenu" style="display:none">
+    <h1>PILIH KARAKTER</h1>
+    <button onclick="setChar('square')">Square</button>
+    <button onclick="setChar('circle')">Circle</button>
+    <button onclick="setChar('triangle')">Triangle</button>
+
+    <h1>PILIH WARNA</h1>
+    <button onclick="setColor('#00eaff')">Blue</button>
+    <button onclick="setColor('#ff0059')">Red</button>
+    <button onclick="setColor('#00ff4c')">Green</button>
+    <button onclick="setColor('#ffe100')">Yellow</button>
+</div>
+
+<!-- BACK BUTTON -->
+<button id="backBtn">←</button>
+
+<!-- GAME -->
+<div id="game">
+    <div id="progressContainer">0%</div>
+    <div id="progressBar"></div>
+    <div id="ground"></div>
+    <div id="player"></div>
+    <div id="score">0</div>
+    <div id="gameover">
+        GAME OVER<br>
+        <button onclick="restartGame()">MAIN ULANG</button>
+        <button onclick="backToMenu()">MENU</button>
+    </div>
+</div>
+
+<script>
+/* ---------- UI HANDLING ---------- */
+const menu = document.getElementById("menu");
+const levelMenu = document.getElementById("levelMenu");
+const characterMenu = document.getElementById("characterMenu");
+const backBtn = document.getElementById("backBtn");
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const scoreText = document.getElementById("score");
+const gameover = document.getElementById("gameover");
+const progressBar = document.getElementById("progressBar");
+const progressContainer = document.getElementById("progressContainer");
+
+function openLevelMenu() {
+    menu.style.display = "none";
+    levelMenu.style.display = "flex";
+    backBtn.style.display = "block";
+}
+function openCharacterMenu() {
+    menu.style.display = "none";
+    characterMenu.style.display = "flex";
+    backBtn.style.display = "block";
+}
+function backToMenu() {
+    menu.style.display = "flex";
+    levelMenu.style.display = "none";
+    characterMenu.style.display = "none";
+    game.style.display = "none";
+    backBtn.style.display = "none";
+}
+
+/* ---------- CHARACTER ---------- */
+let characterType = "square";
+let playerColor = "#00eaff";
+
+function setChar(type) { characterType = type; }
+function setColor(c) { 
+    playerColor = c; 
+}
+
+/* ---------- GAME LOGIC ---------- */
+let jumping=false, yVelocity=0, gravity=0.7, jumpVelocity=15, score=0, gameOver=false;
+let obstacleSpeed=7, obstacleSpawn=900;
+let obstacles = [];
+
+const jumpSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-8.mp3");
+const deathSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3");
+
+/* START GAME */
+function startGame(level){
+    levelMenu.style.display="none";
+    characterMenu.style.display="none";
+    menu.style.display="none";
+    game.style.display="block";
+
+    // Physics per level
+    if(level==="easy"){ obstacleSpeed=5; obstacleSpawn=1200; jumpVelocity=16; gravity=0.7; }
+    if(level==="medium"){ obstacleSpeed=7; obstacleSpawn=900; jumpVelocity=15; gravity=0.9; }
+    if(level==="hard"){ obstacleSpeed=10; obstacleSpawn=600; jumpVelocity=16; gravity=1.2; }
+
+    player.className="";
+    if(characterType==="circle") player.classList.add("circle");
+    if(characterType==="triangle") player.classList.add("triangle");
+
+    player.style.background = `linear-gradient(45deg, ${playerColor}, #00ffcc)`;
+
+    jumping=false; yVelocity=0; score=0; scoreText.innerHTML=0; gameOver=false;
+    obstacles = [];
+    updateProgress();
+
+    jumpSound.load(); deathSound.load();
+    setTimeout(createObstacle,300);
+    update();
+}
+
+/* JUMP */
+document.addEventListener("keydown",e=>{if(e.code==="Space")jump();});
+document.addEventListener("click",jump);
+function jump(){
+    if(!jumping&&!gameOver){
+        jumping=true;
+        yVelocity=jumpVelocity;
+        // horizontal shift sedikit ke depan
+        player.style.left = (parseInt(player.style.left||"80px")+10)+"px";
+        setTimeout(()=>player.style.left = "80px",200);
+        player.style.transform="rotate(-25deg)";
+        setTimeout(()=>player.style.transform="rotate(0deg)",200);
+        jumpSound.currentTime=0;jumpSound.play();
+    }
+}
+
+/* OBSTACLES */
+function createObstacle(){
+    if(gameOver) return;
+    const obs = document.createElement("div");
+    obs.classList.add("obstacle");
+    obs.style.height=(40+Math.random()*60)+"px";
+    obs.style.left="100vw";
+    game.appendChild(obs);
+
+    obstacles.push(obs);
+
+    let pos=window.innerWidth;
+    function move(){
+        if(gameOver) return;
+        pos-=obstacleSpeed;
+        obs.style.left=pos+"px";
+
+        let p = player.getBoundingClientRect();
+        let o = obs.getBoundingClientRect();
+
+        if(p.right>o.left && p.left<o.right && p.bottom>o.top+8) endGame();
+
+        if(pos<-50){obs.remove(); score++; updateProgress();}
+        else requestAnimationFrame(move);
+    }
+    requestAnimationFrame(move);
+    setTimeout(createObstacle, obstacleSpawn + Math.random()*300);
+}
+
+/* PHYSICS */
+function update(){
+    if(gameOver) return;
+    let bottom = parseInt(player.style.bottom||"80px");
+    bottom += yVelocity;
+    yVelocity -= gravity;
+    if(bottom<=80){bottom=80;jumping=false;}
+    player.style.bottom=bottom+"px";
+    requestAnimationFrame(update);
+}
+
+/* GAME OVER */
+function endGame(){
+    if(gameOver) return;
+    gameOver=true;
+    gameover.style.display="block";
+    deathSound.currentTime=0; deathSound.play();
+}
+
+/* RESTART */
+function restartGame(){
+    gameover.style.display="none";
+    startGame("easy"); // default restart easy, bisa disesuaikan
+}
+
+/* ---------- PROGRESS BAR ---------- */
+function updateProgress(){
+    let percent = obstacles.length > 0 ? Math.min(100, Math.floor((score/obstacles.length)*100)) : 0;
+    progressBar.style.width = percent + "%";
+    progressContainer.innerText = percent + "%";
+    scoreText.innerText = score;
+}
+</script>
+
+</body>
+</html>
